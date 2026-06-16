@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+
+
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Dummy API Call Simulation
+
+  
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -19,15 +24,29 @@ export default function Login() {
       }
 
       // Replace this with your actual API endpoint later
-      // const response = await fetch('https://your-api.com/login', ...);
-      
-      // Simulating network delay for the loading state
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/login`,{
+        method : "POST" ,
+        headers:{
+            "Content-Type" : "application/json"
+        } ,
+        body : JSON.stringify({
+            email , password
+        })
+      });
 
-      // Simulate an error if password is too short just to test the error alert
-      if (password.length < 6) {
-        throw new Error('Invalid credentials. Please try again.');
+      const data = await response.json() ;
+
+      if(!response.ok){
+        throw new Error(data.message || "Login Failed")
       }
+       
+      localStorage.setItem(
+        "token" , data.token
+      )
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+       )
       
       // Success Alert matched to the UI theme
       Swal.fire({
@@ -41,6 +60,8 @@ export default function Login() {
           popup: 'rounded-3xl shadow-xl border border-gray-100',
         }
       });
+
+      navigate("/");
 
       // Handle successful redirect or token storage here
 

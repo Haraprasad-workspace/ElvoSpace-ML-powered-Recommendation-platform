@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { useNavigate } from "react-router-dom"
+
+
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate()
 
-  // Dummy API Call Simulation
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Basic validation
-      if (!name || !email || !password || !confirmPassword) {
+      // Basic validation including the new phone field
+      if (!name || !email || !phone || !password || !confirmPassword) {
         throw new Error('Please fill in all fields.');
       }
 
@@ -28,13 +32,31 @@ export default function Register() {
         throw new Error('Password must be at least 6 characters long.');
       }
 
-      // Replace this with your actual API endpoint later
-      // const response = await fetch('https://your-api.com/register', ...);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/register`, {
+        method:"POST",
+        headers:{
+            'Content-Type':'application/json' 
+        },
+        body:JSON.stringify({
+            name , email , phoneNumber:phone , password
+        })
+      })
+
+      const data = await response.json() ;
+
+      if(!response.ok){
+        throw new Error(data.message || "unable to register")
+      }
+
+      localStorage.setItem(
+        "token" , data.token
+      )
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+       )
       
-      // Simulating network delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      
-      // Success Alert
       Swal.fire({
         title: 'Account Created!',
         text: 'Welcome to ElvoSpace. Your journey begins here.',
@@ -46,11 +68,9 @@ export default function Register() {
           popup: 'rounded-3xl shadow-xl border border-gray-100',
         }
       });
-
-      // Handle successful redirect to login or dashboard here
+      navigate("/")
 
     } catch (err) {
-      // Error Alert
       Swal.fire({
         title: 'Registration Failed',
         text: err.message || 'Something went wrong.',
@@ -82,82 +102,112 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F4F3] flex items-center justify-center p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-[#F2F4F3] flex items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden">
+      
+      {/* Background Ambient Elements */}
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="max-w-6xl w-full bg-white rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col-reverse md:flex-row"
+        animate={{ y: [0, -20, 0], opacity: [0.1, 0.2, 0.1] }} 
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[-10%] left-[-5%] w-96 h-96 bg-[#1A3626] rounded-full blur-[100px]"
+      />
+      <motion.div 
+        animate={{ y: [0, 20, 0], opacity: [0.05, 0.15, 0.05] }} 
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-[-10%] right-[-5%] w-[30rem] h-[30rem] bg-[#2A4B38] rounded-full blur-[120px]"
+      />
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-3xl w-full bg-white rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden relative z-10"
       >
-        {/* Left Side: Registration Form */}
-        <div className="md:w-7/12 p-8 sm:p-12 lg:p-16 flex flex-col justify-center">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Create an account</h1>
-            <p className="text-gray-500 mb-8 text-sm">Join us to explore exclusive collections.</p>
+        {/* Top Branding Banner */}
+        <div className="bg-[#1A3626] p-8 sm:p-10 text-center relative overflow-hidden">
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-[#1A3626] font-bold text-xl mb-4 shadow-lg">
+              E
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Join ElvoSpace</h1>
+            <p className="text-[#A2B3A8] mt-2 text-sm sm:text-base">Elevate your living space today.</p>
+          </div>
+        </div>
 
-            <form onSubmit={handleRegister} className="space-y-4">
-              {/* Name Input */}
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
-                />
-              </div>
+        {/* Form Container */}
+        <div className="p-8 sm:p-10 lg:p-12">
+          <form onSubmit={handleRegister} className="space-y-6">
+            
+            {/* Full Name - Spans full width */}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">Full Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Alex Ryman"
+                className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
+              />
+            </div>
 
-              {/* Email Input */}
+            {/* Email and Phone - 2 Column Grid on Desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <label className="block text-sm font-medium text-gray-700">Email Address</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
+                  placeholder="alex@example.com"
+                  className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
                 />
               </div>
 
-              {/* Password Layout: Grid for Desktop, Stack for Mobile */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Password Input */}
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-gray-700">Password</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
+                />
+              </div>
+            </div>
 
-                {/* Confirm Password Input */}
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
-                  />
-                </div>
+            {/* Passwords - 2 Column Grid on Desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
+                />
               </div>
 
-              {/* Register Button */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-900 placeholder-gray-400"
+                />
+              </div>
+            </div>
+
+            {/* Actions Section */}
+            <div className="pt-2">
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 mt-2 bg-[#1A3626] text-white rounded-2xl font-medium text-base shadow-lg shadow-[#1A3626]/20 hover:bg-[#12271a] transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-4 bg-[#1A3626] text-white rounded-2xl font-medium text-base shadow-lg shadow-[#1A3626]/20 hover:bg-[#12271a] transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -169,13 +219,12 @@ export default function Register() {
                 )}
               </motion.button>
 
-              <div className="relative flex items-center py-2">
+              <div className="relative flex items-center py-6">
                 <div className="flex-grow border-t border-gray-200"></div>
-                <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">or</span>
+                <span className="flex-shrink-0 mx-4 text-gray-400 text-sm font-medium">or continue with</span>
                 <div className="flex-grow border-t border-gray-200"></div>
               </div>
 
-              {/* Google Signup Button */}
               <motion.button
                 onClick={handleGoogleSignup}
                 whileHover={{ scale: 1.01 }}
@@ -189,53 +238,17 @@ export default function Register() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-                Sign up with Google
+                Google
               </motion.button>
-              
-              <p className="text-center text-sm text-gray-500 mt-6">
-                Already have an account?{' '}
-                <a href="/login" className="font-semibold text-[#1A3626] hover:text-[#2A4B38] transition-colors">
-                  Sign in
-                </a>
-              </p>
-            </form>
-          </motion.div>
-        </div>
-
-        {/* Right Side: Branding/Visual (Deep Green) */}
-        <div className="md:w-5/12 bg-[#1A3626] p-10 flex flex-col justify-between relative overflow-hidden">
-          {/* Abstract floating shapes */}
-          <motion.div 
-            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }} 
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-20 right-10 w-64 h-64 bg-[#2A4B38] rounded-full blur-3xl"
-          />
-          <motion.div 
-            animate={{ x: [0, -20, 0], y: [0, 20, 0] }} 
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-10 -right-10 w-48 h-48 bg-white/5 rounded-full blur-2xl"
-          />
-
-          <div className="relative z-10 flex justify-end">
-            {/* Logo Placeholder */}
-            <div className="flex items-center gap-2 text-white font-medium text-lg">
-              ElvoSpace
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-[#1A3626] font-bold">
-                E
-              </div>
             </div>
-          </div>
 
-          <div className="relative z-10 mt-12 md:mt-0 text-right">
-            <h2 className="text-white text-3xl md:text-4xl font-semibold tracking-tight leading-snug">
-              Curated Comfort.<br />Elevated Living.
-            </h2>
-            <div className="flex justify-end">
-              <p className="text-gray-300 mt-4 text-sm max-w-xs">
-                Unlock a world of ergonomically crafted, modern relaxation pieces.
-              </p>
-            </div>
-          </div>
+            <p className="text-center text-sm text-gray-500 pt-2">
+              Already have an account?{' '}
+              <a href="/login" className="font-semibold text-[#1A3626] hover:text-[#2A4B38] transition-colors">
+                Sign in
+              </a>
+            </p>
+          </form>
         </div>
       </motion.div>
     </div>
