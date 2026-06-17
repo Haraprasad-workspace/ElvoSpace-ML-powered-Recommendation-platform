@@ -61,7 +61,7 @@ const register = async(req,res)=>{
         const checkUser = await User.findOne({
             email
         })
-        
+    
         if(checkUser){
             return res.status(400).json({
                 message:"The email already exist , please do Login"
@@ -85,7 +85,7 @@ const register = async(req,res)=>{
 
         const token = jwt.sign({id:user._id} , process.env.SECRET_KEY , {expiresIn : '24h'});
 
-        return res.status(400).json({
+        return res.status(200).json({
                 message:"You have been succesfully registered" ,
                 token : token ,
                 user:{
@@ -100,7 +100,17 @@ const register = async(req,res)=>{
         console.log(err)
         return res.status(500).json({
             
-            message : "Internal server error occured in the REGISTER controller"
+            message : err.message
+        })
+    }
+}
+
+const logout = async(req , res)=>{
+    try{
+        
+    }catch(err){
+        return res.status(500).json({
+            message : err.message
         })
     }
 }
