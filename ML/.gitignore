@@ -1,2 +1,7 @@
 datasets/
 cleaned Datasets/
+models/
+
+__pycache__/
+*.pyc
+*.pyo

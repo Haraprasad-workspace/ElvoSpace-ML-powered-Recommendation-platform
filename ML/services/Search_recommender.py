@@ -1,5 +1,6 @@
 import pandas as pd 
 import numpy as np
+from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -9,10 +10,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 import joblib 
 from scipy import sparse
 
-df = joblib.load("../models/products.pkl")
-tfidf = joblib.load("../models/tfidf_vectorizer.pkl")
-tfidf_matrix =  sparse.load_npz("../models/tfidf_matrix.npz")
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODEL_DIR = BASE_DIR / "models"
 
+
+df = joblib.load(MODEL_DIR / "products.pkl")
+tfidf = joblib.load(MODEL_DIR /"tfidf_vectorizer.pkl")
+tfidf_matrix =  sparse.load_npz(MODEL_DIR /"tfidf_matrix.npz")
 
 def rank_recommendation(recommendations , scores , top_indx):
     recommendations = recommendations.copy()
@@ -52,4 +56,4 @@ def recommendBykeywords(text):
 
     recommendations = df.iloc[top_idx].copy()
     recommendations = rank_recommendation(recommendations , scores , top_idx)
-    return recommendations.head(10)
+    return recommendations.head(10).to_dict("records")

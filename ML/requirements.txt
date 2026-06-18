@@ -4,3 +4,5 @@ seaborn
 matplotlib.pyplot
 warnings
 joblib
+fastapi
+scipy
