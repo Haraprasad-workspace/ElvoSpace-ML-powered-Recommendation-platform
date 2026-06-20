@@ -68,7 +68,7 @@ export default function Register() {
           popup: 'rounded-3xl shadow-xl border border-gray-100',
         }
       });
-      navigate("/")
+      navigate("/home")
 
     } catch (err) {
       Swal.fire({

@@ -59,7 +59,7 @@ export default function Login() {
         }
       });
 
-      navigate("/");
+      navigate("/home");
 
       // Handle successful redirect or token storage here
 

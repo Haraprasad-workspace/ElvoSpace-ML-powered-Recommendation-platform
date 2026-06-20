@@ -5,6 +5,9 @@ const cors = require('cors')
 
 const mongoose = require('./configuration/mongoose_config')
 const AuthRoutes = require('./routers/AuthRoutes')
+const RecommendRoutes = require('./routers/RecommendRoutes')
+
+
 const app = express()
 app.use(express.json())
 app.use(
@@ -14,6 +17,7 @@ app.use(
     })
 )
 app.use("/", AuthRoutes)
+app.use("/recommend" , RecommendRoutes)
 app.listen("3000" , ()=>{
     console.log("server listening on port 3000")
 })
