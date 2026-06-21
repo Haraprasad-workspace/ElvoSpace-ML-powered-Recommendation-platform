@@ -1,4 +1,5 @@
 const User = require("../models/UserModel")
+const UserPrefence = require("../models/UserPrefenceModel")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 
@@ -75,6 +76,29 @@ const register = async(req,res)=>{
             email: email,
             phoneNumber : phoneNumber ,
             password : hashedPassword
+        })
+
+        const userprefence = await UserPrefence.create({
+            userId : user._id ,
+            categoryScores : {
+                "Ethnic Wear":0 , "Men's Fashion":0 , "All Appliances":0 ,"Home Entertainment Systems":0 ,"All Electronics":0 ,"Headphones":0 ,"Car Accessories":0 ,"Home Décor":0 
+            } ,
+            topSearchKeywords :[] ,
+            totalSpending : 0 ,
+            totalOrders : 0 ,
+            categoryClickCounts : {
+                "Ethnic Wear":0 , "Men's Fashion":0 , "All Appliances":0 ,"Home Entertainment Systems":0 ,"All Electronics":0 ,"Headphones":0 ,"Car Accessories":0 ,"Home Décor":0 
+            } ,
+            categoryCartCounts:{
+                "Ethnic Wear":0 , "Men's Fashion":0 , "All Appliances":0 ,"Home Entertainment Systems":0 ,"All Electronics":0 ,"Headphones":0 ,"Car Accessories":0 ,"Home Décor":0 
+            } ,
+            categoryPurchaseCounts : {
+                "Ethnic Wear":0 , "Men's Fashion":0 , "All Appliances":0 ,"Home Entertainment Systems":0 ,"All Electronics":0 ,"Headphones":0 ,"Car Accessories":0 ,"Home Décor":0 
+            },
+            totalTimeSpent : 0 ,
+            categoryTimeSpent : {
+                "Ethnic Wear":0 , "Men's Fashion":0 , "All Appliances":0 ,"Home Entertainment Systems":0 ,"All Electronics":0 ,"Headphones":0 ,"Car Accessories":0 ,"Home Décor":0 
+            } 
         })
 
         if(!user){
