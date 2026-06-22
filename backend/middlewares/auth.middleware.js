@@ -12,7 +12,7 @@ const auth = async(req , res , next)=>{
 
         const decoded = jwt.verify(token ,  process.env.SECRET_KEY)
         
-        req.userid = decoded ;
+        req.userid = decoded.id ;
         next() ;
     }catch(err){
         return res.status(500).json({

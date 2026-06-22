@@ -56,4 +56,4 @@ def recommendBykeywords(text):
 
     recommendations = df.iloc[top_idx].copy()
     recommendations = rank_recommendation(recommendations , scores , top_idx)
-    return recommendations['Product Id' , 'similarity','Popularity Score' , 'Value Score'].head(25).to_dict("records")
+    return recommendations[['product Id' ,'Final Score', 'similarity','Popularity Score' , 'Value Score']].head(25).to_dict("records")

@@ -13,18 +13,50 @@ const getSearchRecommendation = async (req , res )=>{
             } ,
             body : JSON.stringify(keyword)
         })
-
-        const data = await response.json()
-
         if(!response.ok){
             return res.status(500).json({
                 message : "some error occured in the ML recommendation engine"
             })
         }
 
+        const data = await response.json()
+
+        const recommendations = data.data ;
+
+        const productIds = recommendations.map(
+                p=>p['product Id']
+            )
+            const products = await Products.find({
+                'product Id' : {
+                    $in : productIds
+                }
+            }).lean();
+
+            const productMap = new Map(
+                products.map(p=>[p['product Id'] , p])
+            );
+
+            const finalProducts = recommendations
+        .map(rec => {
+            const product = productMap.get(
+                rec["product Id"]
+            );
+
+            if (!product) return null;
+
+            return {
+                ...product,
+                FinalScore: rec["Final Score"],
+                similarity: rec["similarity"],
+                popularityScore: rec["Popularity Score"],
+                valueScore: rec["Value Score"]
+            };
+        })
+        .filter(Boolean);
+
         return res.status(200).json({
             success : true ,
-            data : data.data
+            data : finalProducts
         })
 
 
@@ -37,28 +69,87 @@ const getSearchRecommendation = async (req , res )=>{
 
 const getProductRecommendation = async (req , res )=>{
     try{
-        const ProductId = req.body ;
+        const {ProductuId} = req.body ;
+
+        if(!ProductuId){
+            return res.status(400).json({
+                message : "the product uid is not found "
+            })
+        }
+
+        const productDoc = await Products.findById(ProductuId).lean();
+
+        if(!productDoc){
+            return res.status(400).json({
+                message : "the product was not found "
+            })
+        }
+
+        const ProductId = productDoc['product Id']
+
+        console.log(ProductuId)
+        console.log(productDoc)
+        console.log(ProductId)
+
+
 
         const response = await fetch(`${process.env.ML_DOMAIN}/api/recommend/product` , {
             method : "POST" ,
             headers : {
                 'Content-Type' : 'application/json'
             } ,
-            body : JSON.stringify(ProductId)
+            body : JSON.stringify({
+                product_id : ProductId
+            })
         })
-
-        const data = await response.json()
 
         if(!response.ok){
             return res.status(500).json({
-                message : "some error occured in the ML recommendation engine"
+                message : " the ML server is not functioning"
             })
         }
 
+        const data = await response.json()
+
+        const recommendations = data.data ;
+
+        const productIds = recommendations.map(
+                p=>p['product Id']
+            )
+            const products = await Products.find({
+                'product Id' : {
+                    $in : productIds
+                }
+            }).lean();
+
+            const productMap = new Map(
+                products.map(p=>[p['product Id'] , p])
+            );
+
+            const finalProducts = recommendations
+        .map(rec => {
+            const product = productMap.get(
+                rec["product Id"]
+            );
+
+            if (!product) return null;
+
+            return {
+                ...product,
+                FinalScore: rec["Final Score"],
+                similarity: rec["similarity"],
+                popularityScore: rec["Popularity Score"],
+                valueScore: rec["Value Score"]
+            };
+        })
+        .filter(Boolean);
+
         return res.status(200).json({
             success : true ,
-            data : data.data
+            data : finalProducts
         })
+
+
 
 
     }catch(err){

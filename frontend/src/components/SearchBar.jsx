@@ -1,48 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 export default function SearchBar({ className = "", onSearch }) {
   const [query, setQuery] = useState('');
-  const syncIntervalRef = useRef(null);
-
-  const syncProfileData = () => {
-    const trackingData = localStorage.getItem('userMetrics');
-    const token = localStorage.getItem('token');
-    
-    if (trackingData && token) {
-      const payload = new Blob([trackingData], { type: 'application/json' });
-      const success = navigator.sendBeacon(`${import.meta.env.VITE_BACKEND_ORIGIN}/user/sync-metrics`, payload);
-      
-      if (success) {
-        localStorage.removeItem('userMetrics');
-      }
-    }
-  };
-
-  useEffect(() => {
-    syncIntervalRef.current = setInterval(syncProfileData, 300000);
-    window.addEventListener('beforeunload', syncProfileData);
-
-    return () => {
-      clearInterval(syncIntervalRef.current);
-      window.removeEventListener('beforeunload', syncProfileData);
-    };
-  }, []);
+  const navigate = useNavigate();
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    const existingData = JSON.parse(localStorage.getItem('userMetrics') || '{"searches": [], "categoryClicks": {}}');
+    // Route to the SearchResults page, passing the query in the URL
+    navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     
-    existingData.searches.push({
-      term: query.trim(),
-      timestamp: new Date().toISOString()
-    });
-
-    localStorage.setItem('userMetrics', JSON.stringify(existingData));
-    console.log("Searching for:", query);
-    
+    // Trigger the callback (useful for closing the mobile menu)
     if (onSearch) onSearch();
   };
 
@@ -53,7 +24,6 @@ export default function SearchBar({ className = "", onSearch }) {
           type="text" 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          // Using a shorter placeholder on mobile to save space
           placeholder="Search..." 
           className="w-full bg-gray-50 border border-gray-100 rounded-full py-2 sm:py-2.5 pl-4 sm:pl-5 pr-10 sm:pr-12 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3626]/20 focus:border-[#1A3626] transition-all text-gray-800 placeholder-gray-400 min-w-0"
         />
