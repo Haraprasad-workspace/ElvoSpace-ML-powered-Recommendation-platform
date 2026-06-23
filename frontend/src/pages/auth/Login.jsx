@@ -37,9 +37,9 @@ export default function Login() {
       if(!response.ok){
         throw new Error(data.message || "Login Failed")
       }
-       
+       console.log(data)
       localStorage.setItem(
-        "token" , data.token
+        "token" , data.jwt_token
       )
       localStorage.setItem(
         "user",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ProductGrid from './ProductGrid';
+import CartButton from './CartButton';
 
 // Larger fallback banner for the detail view
 const DetailFallbackBanner = ({ category }) => (
@@ -174,24 +175,17 @@ export default function ProductDetail({ product: initialProduct, onBack }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 py-3.5 sm:py-4 bg-[#1A3626] text-white rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:bg-[#12271a] transition-colors"
-            >
-              Add to Cart
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-6 py-3.5 sm:py-4 bg-gray-50 border border-gray-200 text-gray-700 rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              Save
-            </motion.button>
+          <div onClick={(e) => e.stopPropagation()}>
+            {currentProduct.id ? (
+              <CartButton productId={currentProduct.id} />
+            ) : (
+              // Fallback disabled button if somehow no ID is passed
+              <button disabled className="w-8 h-8 sm:w-11 sm:h-11 bg-gray-300 text-white rounded-full flex items-center justify-center shadow-lg">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </motion.div>

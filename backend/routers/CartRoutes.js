@@ -6,8 +6,8 @@ const CartController = require('../controllers/CartController')
 const CartModel = require('../models/CartModel')
 
 router.get("/viewCart" , authmiddleware.auth , CartController.ViewCart)
-router.post("/addToCart" , authmiddleware.auth , CartController.addToCart)
-router.put("/deleteFromcart" , authmiddleware.auth , CartController.deleteFromCart)
+router.post("/AddtoCart" , authmiddleware.auth , CartController.addToCart)
+router.delete("/deleteFromcart" , authmiddleware.auth , CartController.deleteFromCart)
 
 
 module.exports = router 

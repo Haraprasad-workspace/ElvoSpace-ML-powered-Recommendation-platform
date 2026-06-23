@@ -44,13 +44,11 @@ const addToCart = async(req , res)=>{
             })
         }
 
-        const product = await Product.findOne({
-            productId
-        });
+        const product = await Product.findById(productId);
 
         if(!product){
             return res.status(401).json({
-                message : "the producd id was not found "
+                message : "the product id was not found "
             })
         }
 
@@ -93,7 +91,6 @@ const addToCart = async(req , res)=>{
 
         return res.status(200).json({
             success : true ,
-            cart
         });
     }catch(err){
         return res.status(500).json({
@@ -156,7 +153,6 @@ const deleteFromCart = async(req , res)=>{
 
         return res.status(200).json({
             success : true ,
-            cart
         })
 
     }catch(err){

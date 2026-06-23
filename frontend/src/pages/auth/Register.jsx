@@ -49,7 +49,7 @@ export default function Register() {
       }
 
       localStorage.setItem(
-        "token" , data.token
+        "token" , data.jwt_token
       )
 
       localStorage.setItem(

@@ -6,6 +6,7 @@ import Register from './pages/auth/Register';
 import SearchResults from './pages/Main/SearchResults';
 import Profile from './pages/Profile/Profile'
 import Home from './pages/Main/Home';
+import Cart from './pages/Main/Cart';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/home" element={<Home/>} />
         <Route path='/search' element={<SearchResults/>}/>
         <Route path='/user/profile' element={<Profile/>}/>
+        <Route path='/cart' element={<Cart/>}/>
       </Routes>
     </BrowserRouter>
   )

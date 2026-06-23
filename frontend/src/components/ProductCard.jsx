@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import CartButton from './CartButton';
 
 // Helper component for the fallback banner
 const FallbackBanner = ({ category }) => (
@@ -21,6 +22,7 @@ export default function ProductCard({ product, onClick }) {
   const [imgError, setImgError] = useState(false); // Track broken images
 
   const {
+    _id = null ,
     name = "Unnamed Product",
     main_category = "Category",
     sub_category = "",
@@ -112,16 +114,18 @@ export default function ProductCard({ product, onClick }) {
             )}
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-8 h-8 sm:w-11 sm:h-11 bg-[#1A3626] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#12271a] transition-colors"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-          </motion.button>
+          <div onClick={(e) => e.stopPropagation()}>
+            {product ? (
+              <CartButton product={product} />
+            ) : (
+              // Fallback disabled button if somehow no ID is passed
+              <button disabled className="w-8 h-8 sm:w-11 sm:h-11 bg-gray-300 text-white rounded-full flex items-center justify-center shadow-lg">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>
