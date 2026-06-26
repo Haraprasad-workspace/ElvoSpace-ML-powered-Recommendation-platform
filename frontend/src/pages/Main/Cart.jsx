@@ -17,38 +17,47 @@ const CartFallbackImage = ({ category }) => (
 );
 
 export default function Cart() {
-  // Grab the entire object from Zustand and convert it to an array for mapping
   const cartItemsMap = useCartStore((state) => state.items);
   const cartItems = Object.values(cartItemsMap);
+  console.log(cartItemsMap);
+  console.log(cartItems);
 
   const [imgErrors, setImgErrors] = useState({});
+  
   const handleImgError = (id) => {
     setImgErrors(prev => ({ ...prev, [id]: true }));
   };
 
-  // Calculate dynamic totals instantly
   const subtotal = cartItems.reduce((acc, cartData) => {
     const { product, quantity } = cartData;
-    const cleanPrice = parseFloat(String(product.price).replace(/[^0-9.]/g, '')) || 0;
+    const cleanPrice = parseFloat(String(product.discount_price).replace(/[^0-9.]/g, '')) || 0;
     return acc + (cleanPrice * quantity);
   }, 0);
 
-  const shipping = subtotal > 0 ? (subtotal > 2000 ? 0 : 99) : 0; 
+  const shipping = subtotal > 0 ? (subtotal > 2000 ? 0 : 49) : 0; 
   const grandTotal = subtotal + shipping;
 
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto w-full pb-12 mt-4 lg:mt-8">
         
-        <div className="mb-8 px-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Your Cart</h1>
-          <p className="text-gray-500 mt-2">
-            {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
-          </p>
+        <div className="mb-8 px-2 flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Your Cart</h1>
+            <p className="text-gray-500 mt-2">
+              {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
+            </p>
+          </div>
+          
+          {/* Quick link to keep shopping */}
+          {cartItems.length > 0 && (
+            <Link to="/home" className="hidden sm:inline-flex text-sm font-bold text-[#1A3626] hover:underline">
+              Continue Shopping &rarr;
+            </Link>
+          )}
         </div>
 
         {cartItems.length === 0 ? (
-          /* --- EMPTY STATE --- */
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center py-24 bg-white rounded-[2rem] border border-gray-100 shadow-sm text-center px-4"
@@ -67,46 +76,46 @@ export default function Cart() {
             </Link>
           </motion.div>
         ) : (
-          /* --- CART CONTENT --- */
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             
-            {/* Left: Cart Items List */}
             <div className="flex-1">
               <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden p-4 sm:p-6">
                 <AnimatePresence>
                   {cartItems.map(({ product, quantity }) => (
                     <motion.div 
-                      key={product.id}
+                      key={product._id}
                       initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                       animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
                       exit={{ opacity: 0, height: 0, marginBottom: 0, scale: 0.95 }}
                       transition={{ duration: 0.3 }}
                       className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center p-4 rounded-2xl border border-gray-50 bg-gray-50/50 hover:bg-gray-50 transition-colors"
                     >
-                      {/* Product Image */}
-                      <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 flex items-center justify-center p-2">
-                        {imgErrors[product.id] || !product.imageUrl ? (
+                      {/* Product Image - Now a clickable link */}
+                      <Link to={`/search?q=${encodeURIComponent(product.name)}`} className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 flex items-center justify-center p-2 cursor-pointer hover:shadow-md transition-shadow">
+                        {imgErrors[product._id] || !product.image ? (
                           <CartFallbackImage category={product.main_category} />
                         ) : (
                           <img 
-                            src={product.imageUrl} 
+                            src={product.image} 
                             alt={product.name} 
-                            onError={() => handleImgError(product.id)}
+                            onError={() => handleImgError(product._id)}
                             className="w-full h-full object-contain"
                           />
                         )}
-                      </div>
+                      </Link>
 
-                      {/* Product Details */}
+                      {/* Product Details - Title is now a clickable link */}
                       <div className="flex-1 flex flex-col w-full text-center sm:text-left">
                         <span className="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
                           {product.main_category}
                         </span>
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight mb-2 line-clamp-2">
-                          {product.name}
-                        </h3>
+                        <Link to={`/search?q=${encodeURIComponent(product.name)}`}>
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight mb-2 line-clamp-2 hover:text-[#1A3626] transition-colors cursor-pointer">
+                            {product.name}
+                          </h3>
+                        </Link>
                         <p className="text-lg font-extrabold text-[#1A3626] mb-4 sm:mb-0">
-                          {product.price || 'Price varies'}
+                          {product.discount_price || 'Price varies'}
                         </p>
                       </div>
 
@@ -119,7 +128,7 @@ export default function Cart() {
                         <div className="sm:mt-auto pt-2 text-right">
                           <p className="text-xs text-gray-500 font-medium mb-0.5">Item Total</p>
                           <p className="text-lg font-bold text-gray-900">
-                            ₹{(parseFloat(String(product.price).replace(/[^0-9.]/g, '')) * quantity).toLocaleString()}
+                            ₹{(parseFloat(String(product.discount_price).replace(/[^0-9.]/g, '')) * quantity).toLocaleString()}
                           </p>
                         </div>
                       </div>

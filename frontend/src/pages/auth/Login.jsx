@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import useCartStore from '../../Global Store/useCartStore';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,8 +10,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const setCart = useCartStore((state) => state.setCart);
 
-  
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -45,6 +46,23 @@ export default function Login() {
         "user",
         JSON.stringify(data.user)
        )
+      
+
+      const cartResponse = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/cart/viewCart`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${data.jwt_token}`
+        }
+      });
+
+      if (cartResponse.ok) {
+        const cartData = await cartResponse.json();
+        setCart(cartData.cartInfo || []);
+       
+      } else {
+        console.warn("Could not fetch cart during login. Assuming empty.");
+      }
       
       // Success Alert matched to the UI theme
       Swal.fire({

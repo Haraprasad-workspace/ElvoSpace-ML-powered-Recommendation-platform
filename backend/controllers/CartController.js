@@ -11,20 +11,42 @@ const ViewCart = async(req , res)=>{
             })
         }
 
-        const cart = await Cart.find({
+        const cart = await Cart.findOne({
             userId : id
         }) 
 
         if(!cart){
-            return res.status(400).json({
+            return res.status(404).json({
                 message : "the cart is currently empty"
             })
         }
+        const productIds = cart.products.map(p=>p.productId);
+        
+        const products = await Product.find({
+            "_id" : {$in : productIds}
+        }).lean()
+        
+
+
+        const productMap = new Map(
+            products.map(p=>[p._id.toString(), p])
+        )
+        
+        const cartItems = cart.products.map(item =>({
+            product : productMap.get(item.productId.toString()) ,
+            quantity : item.quantity
+        }))
+
+        console.log(cartItems);
+       
+
         return res.status(200).json({
             message : "cart fetched successfully" ,
-            cartInfo : cart
+            cartInfo : cartItems
         })
+
     }catch(err){
+        console.log(err.message)
         return res.status(500).json({
             message : err.message
         })
@@ -72,7 +94,7 @@ const addToCart = async(req , res)=>{
             })
         }else{
             const existingProduct = cart.products.find(
-                p => p.productId === productId
+                p => p.productId.toString() === productId.toString()
             )
             if(existingProduct){
                 existingProduct.quantity +=1 ;
@@ -99,7 +121,7 @@ const addToCart = async(req , res)=>{
     }
 }
 
-const deleteFromCart = async(req , res)=>{
+const DeleteFromCart = async(req , res)=>{
     try{
         const userId = req.userid ;
         const {productId} = req.body;
@@ -109,7 +131,6 @@ const deleteFromCart = async(req , res)=>{
                 message : "the product id is missing "
             })
         }
-
         const product = await Product.findById(productId);
         if(!product){
             return res.status(401).json({
@@ -128,8 +149,8 @@ const deleteFromCart = async(req , res)=>{
             })
         }
         const existingProduct = cart.products.find(
-            p=>p.productId === productId
-        );
+            p=>p.productId.toString() === productId.toString()
+        )
         if(!existingProduct){
             return res.status(404).json({
                 message : "the product do not exist in the cart  , unable to delete "
@@ -138,17 +159,22 @@ const deleteFromCart = async(req , res)=>{
         if(existingProduct.quantity > 1 ) existingProduct.quantity--;
         else{
             cart.products = cart.products.filter(
-                p=>p.productId!==productId
+                p=>p.productId.toString()!==productId.toString()
             );
 
             cart.totalProducts-=1;
         }
         
-        cart.totalAmount = Math.max(
-            0 , cart.totalAmount - product_amt 
-        ) ;
-
         if(cart.products.length === 0) cart.totalAmount = 0;
+        let totalamount = 0;
+        let totalproducts = cart.products.length;
+
+        for(const item of cart.products){
+            const product = await Product.findById(item.productId);
+            totalamount += product.discount_price * item.quantity;
+        }
+        cart.totalAmount = totalamount ;
+
         await cart.save();
 
         return res.status(200).json({
@@ -156,10 +182,11 @@ const deleteFromCart = async(req , res)=>{
         })
 
     }catch(err){
+        console.log(err.message)
         return res.status(500).json({
             message : err.message
         })
     }
 }
 
-module.exports = {ViewCart , addToCart , deleteFromCart}
+module.exports = {ViewCart , addToCart , DeleteFromCart}

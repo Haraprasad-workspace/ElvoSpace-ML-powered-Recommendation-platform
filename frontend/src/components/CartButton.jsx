@@ -6,7 +6,8 @@ export default function CartButton({ product }) {
   const [isLoading, setIsLoading] = useState(false);
   
   // Select only the specific quantity for this product from the global store
-  const quantity = useCartStore((state) => state.items[product] || 0);
+  const cartItem = useCartStore((state) => state.items[product._id]);
+  const quantity = cartItem?.quantity || 0;
   const incrementQuantity = useCartStore((state) => state.incrementQuantity);
   const decrementQuantity = useCartStore((state) => state.decrementQuantity);
 
@@ -46,14 +47,19 @@ export default function CartButton({ product }) {
 
     setIsLoading(true);
     try {
+
+      console.log("product id is : " , product._id)
+
       const response = await fetch(`${import.meta.env.VITE_BACKEND_ORIGIN}/cart/DeleteFromCart`, {
-        method: 'DELETE', // Adjust to DELETE if your backend requires it
+        method: 'POST', // Adjust to DELETE if your backend requires it
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         } , 
         body: JSON.stringify({ productId: product._id})
       });
+
+
 
       if (response.ok) {
         // Only update the global Zustand state if the backend confirms the deletion
